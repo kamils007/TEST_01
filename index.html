@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gra Zdrapka</title>
     <style>
-        /* Ogólne ustawienia */
         body {
             display: flex;
             justify-content: center;
@@ -14,7 +13,7 @@
             margin: 0;
             background-color: #333;
             font-family: Arial, sans-serif;
-            overflow: hidden; /* Ukrywa przewijanie */
+            overflow: hidden;
         }
 
         #mainContainer {
@@ -29,21 +28,16 @@
             max-width: 600px;
         }
 
-        /* Obszar komunikacyjny po lewej stronie */
         #communicationArea {
             width: 100%;
-            height: auto;
             background-color: #444;
             color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            text-align: center;
             border-radius: 8px;
             padding: 10px;
             box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
         }
 
-        /* Kwadratowa matryca 3x3 po prawej stronie */
         #squareScratch {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -54,69 +48,93 @@
             box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
         }
 
-        /* Każde pole w kwadratowej matrycy */
-        .scratchCanvas {
-            width: 90%;
-            max-width: 100px;
-            aspect-ratio: 1; /* Zapewnia kwadratowe proporcje */
-            border-radius: 50%; /* Okrągłe okna */
+        .scratchContainer {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
             overflow: hidden;
             background-color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        /* Media Queries dla mniejszych ekranów */
-        @media (max-width: 768px) {
-            #mainContainer {
-                width: 95vw;
-            }
-
-            .scratchCanvas {
-                max-width: 80px;
-            }
+        .scratchCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #cccccc;
+            z-index: 1;
         }
 
-        @media (max-width: 480px) {
-            #mainContainer {
-                width: 100vw;
-                padding: 10px;
-            }
-
-            .scratchCanvas {
-                max-width: 60px;
-            }
+        .hiddenSymbol {
+            font-size: 2em;
+            color: #fff;
+            display: block;
+            opacity: 0;
+            transition: opacity 0.5s;
+            z-index: 0;
         }
+
     </style>
 </head>
 <body>
     <div id="mainContainer">
-        <!-- Obszar komunikacyjny po lewej stronie -->
         <div id="communicationArea">
             <p>Witaj! Odkryj pola po prawej stronie, aby zobaczyć, co się pod nimi kryje.</p>
         </div>
-        
-        <!-- Kwadratowa matryca 3x3 po prawej stronie -->
+
         <div id="squareScratch">
-            <canvas class="scratchCanvas" width="100" height="100"></canvas>
-            <canvas class="scratchCanvas" width="100" height="100"></canvas>
-            <canvas class="scratchCanvas" width="100" height="100"></canvas>
-            <canvas class="scratchCanvas" width="100" height="100"></canvas>
-            <canvas class="scratchCanvas" width="100" height="100"></canvas>
-            <canvas class="scratchCanvas" width="100" height="100"></canvas>
-            <canvas class="scratchCanvas" width="100" height="100"></canvas>
-            <canvas class="scratchCanvas" width="100" height="100"></canvas>
-            <canvas class="scratchCanvas" width="100" height="100"></canvas>
+            <div class="scratchContainer">
+                <canvas class="scratchCanvas" width="100" height="100"></canvas>
+                <div class="hiddenSymbol">★</div>
+            </div>
+            <div class="scratchContainer">
+                <canvas class="scratchCanvas" width="100" height="100"></canvas>
+                <div class="hiddenSymbol">♥</div>
+            </div>
+            <div class="scratchContainer">
+                <canvas class="scratchCanvas" width="100" height="100"></canvas>
+                <div class="hiddenSymbol">♣</div>
+            </div>
+            <div class="scratchContainer">
+                <canvas class="scratchCanvas" width="100" height="100"></canvas>
+                <div class="hiddenSymbol">♦</div>
+            </div>
+            <div class="scratchContainer">
+                <canvas class="scratchCanvas" width="100" height="100"></canvas>
+                <div class="hiddenSymbol">☀</div>
+            </div>
+            <div class="scratchContainer">
+                <canvas class="scratchCanvas" width="100" height="100"></canvas>
+                <div class="hiddenSymbol">☾</div>
+            </div>
+            <div class="scratchContainer">
+                <canvas class="scratchCanvas" width="100" height="100"></canvas>
+                <div class="hiddenSymbol">★</div>
+            </div>
+            <div class="scratchContainer">
+                <canvas class="scratchCanvas" width="100" height="100"></canvas>
+                <div class="hiddenSymbol">♥</div>
+            </div>
+            <div class="scratchContainer">
+                <canvas class="scratchCanvas" width="100" height="100"></canvas>
+                <div class="hiddenSymbol">♣</div>
+            </div>
         </div>
     </div>
 
     <script>
-        // Pobieramy wszystkie płótna w matrycy po prawej stronie
-        const canvases = document.querySelectorAll(".scratchCanvas");
+        const scratchContainers = document.querySelectorAll(".scratchContainer");
 
-        // Funkcja inicjalizująca zdrapkę dla każdego płótna
-        canvases.forEach(canvas => {
+        scratchContainers.forEach(container => {
+            const canvas = container.querySelector(".scratchCanvas");
+            const symbol = container.querySelector(".hiddenSymbol");
             const ctx = canvas.getContext("2d");
 
-            // Wypełnij płótno kolorem zdrapki
             ctx.fillStyle = "#cccccc";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -124,6 +142,7 @@
 
             function startScratch(e) {
                 isScratching = true;
+                symbol.style.opacity = 1; // Ustawiamy przezroczystość na 1, aby odsłonić symbol
                 scratch(e);
             }
 
