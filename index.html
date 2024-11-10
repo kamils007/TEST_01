@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gra Zdrapka</title>
     <style>
+        /* Ogólne ustawienia */
         body {
             display: flex;
             justify-content: center;
@@ -13,7 +14,7 @@
             margin: 0;
             background-color: #333;
             font-family: Arial, sans-serif;
-            overflow: hidden;
+            overflow: hidden; /* Ukrywa przewijanie */
         }
 
         #mainContainer {
@@ -28,16 +29,20 @@
             max-width: 600px;
         }
 
+        /* Obszar komunikacyjny */
         #communicationArea {
             width: 100%;
             background-color: #444;
             color: #fff;
-            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             border-radius: 8px;
             padding: 10px;
             box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
         }
 
+        /* Kwadratowa matryca 3x3 */
         #squareScratch {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -48,37 +53,48 @@
             box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
         }
 
+        /* Każdy element zdrapki */
         .scratchContainer {
             position: relative;
-            width: 100px;
-            height: 100px;
+            width: 90%;
+            max-width: 100px;
+            aspect-ratio: 1;
             border-radius: 50%;
             overflow: hidden;
             background-color: #333;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
-        .scratchCanvas {
+        /* Symbol ukryty pod zdrapką */
+        .symbolCanvas, .scratchCanvas {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #cccccc;
-            z-index: 1;
+            border-radius: 50%;
         }
 
-        .hiddenSymbol {
-            font-size: 2em;
-            color: #fff;
-            display: block;
-            opacity: 0;
-            transition: opacity 0.5s;
-            z-index: 0;
+        /* Media Queries dla mniejszych ekranów */
+        @media (max-width: 768px) {
+            #mainContainer {
+                width: 95vw;
+            }
+
+            .scratchContainer {
+                max-width: 80px;
+            }
         }
 
+        @media (max-width: 480px) {
+            #mainContainer {
+                width: 100vw;
+                padding: 10px;
+            }
+
+            .scratchContainer {
+                max-width: 60px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -86,88 +102,101 @@
         <div id="communicationArea">
             <p>Witaj! Odkryj pola po prawej stronie, aby zobaczyć, co się pod nimi kryje.</p>
         </div>
-
+        
+        <!-- Siatka 3x3 z elementami zdrapki -->
         <div id="squareScratch">
             <div class="scratchContainer">
+                <canvas class="symbolCanvas" width="100" height="100"></canvas>
                 <canvas class="scratchCanvas" width="100" height="100"></canvas>
-                <div class="hiddenSymbol">★</div>
             </div>
             <div class="scratchContainer">
+                <canvas class="symbolCanvas" width="100" height="100"></canvas>
                 <canvas class="scratchCanvas" width="100" height="100"></canvas>
-                <div class="hiddenSymbol">♥</div>
             </div>
             <div class="scratchContainer">
+                <canvas class="symbolCanvas" width="100" height="100"></canvas>
                 <canvas class="scratchCanvas" width="100" height="100"></canvas>
-                <div class="hiddenSymbol">♣</div>
             </div>
             <div class="scratchContainer">
+                <canvas class="symbolCanvas" width="100" height="100"></canvas>
                 <canvas class="scratchCanvas" width="100" height="100"></canvas>
-                <div class="hiddenSymbol">♦</div>
             </div>
             <div class="scratchContainer">
+                <canvas class="symbolCanvas" width="100" height="100"></canvas>
                 <canvas class="scratchCanvas" width="100" height="100"></canvas>
-                <div class="hiddenSymbol">☀</div>
             </div>
             <div class="scratchContainer">
+                <canvas class="symbolCanvas" width="100" height="100"></canvas>
                 <canvas class="scratchCanvas" width="100" height="100"></canvas>
-                <div class="hiddenSymbol">☾</div>
             </div>
             <div class="scratchContainer">
+                <canvas class="symbolCanvas" width="100" height="100"></canvas>
                 <canvas class="scratchCanvas" width="100" height="100"></canvas>
-                <div class="hiddenSymbol">★</div>
             </div>
             <div class="scratchContainer">
+                <canvas class="symbolCanvas" width="100" height="100"></canvas>
                 <canvas class="scratchCanvas" width="100" height="100"></canvas>
-                <div class="hiddenSymbol">♥</div>
             </div>
             <div class="scratchContainer">
+                <canvas class="symbolCanvas" width="100" height="100"></canvas>
                 <canvas class="scratchCanvas" width="100" height="100"></canvas>
-                <div class="hiddenSymbol">♣</div>
             </div>
         </div>
     </div>
 
     <script>
+        // Pobieramy kontenery zdrapek
         const scratchContainers = document.querySelectorAll(".scratchContainer");
 
         scratchContainers.forEach(container => {
-            const canvas = container.querySelector(".scratchCanvas");
-            const symbol = container.querySelector(".hiddenSymbol");
-            const ctx = canvas.getContext("2d");
+            const symbolCanvas = container.querySelector(".symbolCanvas");
+            const scratchCanvas = container.querySelector(".scratchCanvas");
+            const symbolCtx = symbolCanvas.getContext("2d");
+            const scratchCtx = scratchCanvas.getContext("2d");
 
-            ctx.fillStyle = "#cccccc";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // Rysowanie symbolu na dolnym canvasie
+            symbolCtx.fillStyle = "#ff0000"; // Czerwony kolor symbolu
+            symbolCtx.font = "30px Arial";
+            symbolCtx.textAlign = "center";
+            symbolCtx.textBaseline = "middle";
+            symbolCtx.fillText("★", symbolCanvas.width / 2, symbolCanvas.height / 2);
+
+            // Rysowanie warstwy zdrapki na górnym canvasie
+            scratchCtx.fillStyle = "#cccccc";
+            scratchCtx.fillRect(0, 0, scratchCanvas.width, scratchCanvas.height);
 
             let isScratching = false;
 
             function startScratch(e) {
                 isScratching = true;
-                symbol.style.opacity = 1; // Ustawiamy przezroczystość na 1, aby odsłonić symbol
                 scratch(e);
             }
 
             function scratch(e) {
                 if (!isScratching) return;
 
-                const rect = canvas.getBoundingClientRect();
+                const rect = scratchCanvas.getBoundingClientRect();
                 const x = (e.clientX || e.touches[0].clientX) - rect.left;
                 const y = (e.clientY || e.touches[0].clientY) - rect.top;
 
-                ctx.clearRect(x - 15, y - 15, 30, 30);
+                scratchCtx.globalCompositeOperation = "destination-out";
+                scratchCtx.beginPath();
+                scratchCtx.arc(x, y, 15, 0, 2 * Math.PI);
+                scratchCtx.fill();
             }
 
             function stopScratch() {
                 isScratching = false;
             }
 
-            canvas.addEventListener("mousedown", startScratch);
-            canvas.addEventListener("mousemove", scratch);
-            canvas.addEventListener("mouseup", stopScratch);
-            canvas.addEventListener("mouseleave", stopScratch);
+            scratchCanvas.addEventListener("mousedown", startScratch);
+            scratchCanvas.addEventListener("mousemove", scratch);
+            scratchCanvas.addEventListener("mouseup", stopScratch);
+            scratchCanvas.addEventListener("mouseleave", stopScratch);
 
-            canvas.addEventListener("touchstart", startScratch);
-            canvas.addEventListener("touchmove", scratch);
-            canvas.addEventListener("touchend", stopScratch);
+            scratchCanvas.addEventListener("touchstart", startScratch);
+            scratchCanvas.addEventListener("touchmove", scratch);
+            scratchCanvas.addEventListener("touchend", stopScratch);
         });
     </script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
