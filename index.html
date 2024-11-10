@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gra Zdrapka</title>
+    <title>Gra Zdrapka z losowymi symbolami</title>
     <style>
         /* Ogólne ustawienia */
         body {
@@ -145,6 +145,9 @@
     </div>
 
     <script>
+        // Tablica z symbolami Unicode
+        const symbols = ["\u2739", "\u2605"]; // Gwiazdka z ośmioma ramionami i pełna gwiazdka
+
         // Pobieramy kontenery zdrapek
         const scratchContainers = document.querySelectorAll(".scratchContainer");
 
@@ -154,12 +157,14 @@
             const symbolCtx = symbolCanvas.getContext("2d");
             const scratchCtx = scratchCanvas.getContext("2d");
 
-            // Rysowanie symbolu na dolnym canvasie
+            // Losowanie symbolu z tablicy i rysowanie go na dolnym canvasie
+            const randomIndex = Math.floor(Math.random() * symbols.length);
+            const chosenSymbol = symbols[randomIndex];
             symbolCtx.fillStyle = "#ff0000"; // Czerwony kolor symbolu
-            symbolCtx.font = "30px Arial";
+            symbolCtx.font = "90px Arial";
             symbolCtx.textAlign = "center";
             symbolCtx.textBaseline = "middle";
-            symbolCtx.fillText("★", symbolCanvas.width / 2, symbolCanvas.height / 2);
+            symbolCtx.fillText(chosenSymbol, symbolCanvas.width / 2, symbolCanvas.height / 2);
 
             // Rysowanie warstwy zdrapki na górnym canvasie
             scratchCtx.fillStyle = "#cccccc";
