@@ -156,63 +156,118 @@
 
     <script>
         // Tablica z symbolami Unicode
-        const symbols = ["\u2739", "\u2605"]; // Gwiazdka z ośmioma ramionami i pełna gwiazdka
 
-        // Pobieramy kontenery zdrapek
-        const scratchContainers = document.querySelectorAll(".scratchContainer");
+             // Tablica z symbolami Unicode
 
-        scratchContainers.forEach(container => {
-            const symbolCanvas = container.querySelector(".symbolCanvas");
-            const scratchCanvas = container.querySelector(".scratchCanvas");
-            const symbolCtx = symbolCanvas.getContext("2d");
-            const scratchCtx = scratchCanvas.getContext("2d");
+const symbols = ["\u2739", "\u2605"]; // Gwiazdka z ośmioma ramionami i pełna gwiazdka
 
-            // Losowanie symbolu z tablicy i rysowanie go na dolnym canvasie
-            const randomIndex = Math.floor(Math.random() * symbols.length);
-            const chosenSymbol = symbols[randomIndex];
-            symbolCtx.fillStyle = "#ff0000"; // Czerwony kolor symbolu
-            symbolCtx.font = "90px Arial";
-            symbolCtx.textAlign = "center";
-            symbolCtx.textBaseline = "middle";
-            symbolCtx.fillText(chosenSymbol, symbolCanvas.width / 2, symbolCanvas.height / 2);
+// Pobieramy kontenery zdrapek
+const scratchContainers = document.querySelectorAll(".scratchContainer");
 
-            // Rysowanie warstwy zdrapki na górnym canvasie
-            scratchCtx.fillStyle = "#cccccc";
-            scratchCtx.fillRect(0, 0, scratchCanvas.width, scratchCanvas.height);
+scratchContainers.forEach(container => {
+    const symbolCanvas = container.querySelector(".symbolCanvas");
+    const scratchCanvas = container.querySelector(".scratchCanvas");
+    const symbolCtx = symbolCanvas.getContext("2d");
+    const scratchCtx = scratchCanvas.getContext("2d");
 
-            let isScratching = false;
+    // Kolory dla progów
 
-            function startScratch(e) {
-                isScratching = true;
-                scratch(e);
+const colors = [
+    { r: 51, g: 51, b: 51 },   // Początkowy (bardzo ciemny szary)
+    { r: 53, g: 49, b: 49 },    // Próg 25% (bardzo ciemny czerwony)
+    { r: 56, g: 46, b: 46 },   // Początkowy (bardzo ciemny szary)
+    { r: 60, g: 40, b: 40 },    // Próg 50% (ciemnoczerwony)
+    { r: 67, g: 33, b: 33 },   // Początkowy (bardzo ciemny szary)
+    { r: 204, g: 0, b: 0 },    // Próg 75% (średni czerwony)
+    { r: 255, g: 0, b: 0 }     // Próg 100% (pełny jasny czerwony)
+];
+
+
+    let currentColorIndex = 0;
+
+    // Rysowanie symbolu w początkowym kolorze
+    function drawSymbol(color) {
+        symbolCtx.clearRect(0, 0, symbolCanvas.width, symbolCanvas.height);
+        symbolCtx.fillStyle = `rgb(${color.r}, ${color.g}, ${color.b})`;
+        symbolCtx.font = "90px Arial";
+        symbolCtx.textAlign = "center";
+        symbolCtx.textBaseline = "middle";
+        symbolCtx.fillText(chosenSymbol, symbolCanvas.width / 2, symbolCanvas.height / 2);
+    }
+
+    const randomIndex = Math.floor(Math.random() * symbols.length);
+    const chosenSymbol = symbols[randomIndex];
+    drawSymbol(colors[currentColorIndex]); // Startujemy od początkowego koloru
+
+    // Na początku całkowicie zasłaniamy symbol warstwą zdrapki
+    scratchCtx.fillStyle = "#cccccc"; // Kolor zdrapki
+    scratchCtx.fillRect(0, 0, scratchCanvas.width, scratchCanvas.height);
+
+    // Funkcja sprawdzająca procent zdrapanej powierzchni i zmieniająca kolor
+    function updateColorBasedOnProgress(progress) {
+        const thresholds = [12, 25, 37, 50, 62, 75]; // Progi procentowe
+
+        if (progress >= thresholds[currentColorIndex]) {
+            currentColorIndex = Math.min(currentColorIndex + 1, colors.length - 1); // Przejście do następnego koloru
+            drawSymbol(colors[currentColorIndex]);
+        }
+    }
+
+    // Funkcja obliczająca procent zdrapanej powierzchni
+    function calculateScratchedPercentage(canvas) {
+        const ctx = canvas.getContext("2d");
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const pixels = imageData.data;
+        let transparentPixels = 0;
+
+        for (let i = 3; i < pixels.length; i += 4) {
+            if (pixels[i] === 0) {
+                transparentPixels++;
             }
+        }
 
-            function scratch(e) {
-                if (!isScratching) return;
+        const totalPixels = canvas.width * canvas.height;
+        return (transparentPixels / totalPixels) * 100;
+    }
 
-                const rect = scratchCanvas.getBoundingClientRect();
-                const x = (e.clientX || e.touches[0].clientX) - rect.left;
-                const y = (e.clientY || e.touches[0].clientY) - rect.top;
+    let isScratching = false;
 
-                scratchCtx.globalCompositeOperation = "destination-out";
-                scratchCtx.beginPath();
-                scratchCtx.arc(x, y, 15, 0, 2 * Math.PI);
-                scratchCtx.fill();
-            }
+    function startScratch(e) {
+        isScratching = true;
+        scratch(e);
+    }
 
-            function stopScratch() {
-                isScratching = false;
-            }
+    function scratch(e) {
+        if (!isScratching) return;
 
-            scratchCanvas.addEventListener("mousedown", startScratch);
-            scratchCanvas.addEventListener("mousemove", scratch);
-            scratchCanvas.addEventListener("mouseup", stopScratch);
-            scratchCanvas.addEventListener("mouseleave", stopScratch);
+        const rect = scratchCanvas.getBoundingClientRect();
+        const x = (e.clientX || e.touches[0].clientX) - rect.left;
+        const y = (e.clientY || e.touches[0].clientY) - rect.top;
 
-            scratchCanvas.addEventListener("touchstart", startScratch);
-            scratchCanvas.addEventListener("touchmove", scratch);
-            scratchCanvas.addEventListener("touchend", stopScratch);
-        });
+        scratchCtx.globalCompositeOperation = "destination-out";
+        scratchCtx.beginPath();
+        scratchCtx.arc(x, y, 15, 0, 2 * Math.PI);
+        scratchCtx.fill();
+
+        // Oblicz procent zdrapanej powierzchni i sprawdź, czy zmienić kolor
+        const scratchedPercentage = calculateScratchedPercentage(scratchCanvas);
+        updateColorBasedOnProgress(scratchedPercentage);
+    }
+
+    function stopScratch() {
+        isScratching = false;
+    }
+
+    scratchCanvas.addEventListener("mousedown", startScratch);
+    scratchCanvas.addEventListener("mousemove", scratch);
+    scratchCanvas.addEventListener("mouseup", stopScratch);
+    scratchCanvas.addEventListener("mouseleave", stopScratch);
+
+    scratchCanvas.addEventListener("touchstart", startScratch);
+    scratchCanvas.addEventListener("touchmove", scratch);
+    scratchCanvas.addEventListener("touchend", stopScratch);
+});
+      // KOniec JAVAS
     </script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
